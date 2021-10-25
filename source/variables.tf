@@ -427,6 +427,12 @@ variable "opentelemetry_enable" {
   description = "Enabling opentelemetry module on eks cluster"
 }
 
+variable "kubevela_enable" {
+  type        = bool
+  default     = false
+  description = "Enabling kubevela module on eks cluster"
+}
+
 variable "ekslog_retention_in_days" {
   default     = 90
   description = "Number of days to retain log events. Default retention - 90 days."
@@ -550,6 +556,7 @@ variable "opentelemetry_enable_autoscaling_standalone_collector" {
   default     = false
   description = "Enabling the autoscaling of the standalone gateway collector on eks cluster"
 }
+
 variable "opentelemetry_image_tag" {
   default     = "0.31.0"
   description = "Docker image tag for opentelemetry from open-telemetry"
@@ -588,4 +595,24 @@ variable "opentelemetry_min_standalone_collectors" {
 variable "opentelemetry_max_standalone_collectors" {
   default     = 3
   description = "The maximum number of opentelemetry standalone gateway collectors to run"
+}
+
+variable "kubevela_image_tag" {
+  default     = "v1.1.6"
+  description = "Docker image tag for kubevela"
+}
+
+variable "kubevela_image" {
+  default     = "oamdev/vela-core"
+  description = "Docker image for kubevela"
+}
+
+variable "kubevela_helm_chart_version" {
+  default     = "1.1.6"
+  description = "Helm chart version for kubevela"
+}
+
+variable "kubevela_helm_chart" {
+  default     = "kubevela/vela-core"
+  description = "Helm chart for kubevela"
 }

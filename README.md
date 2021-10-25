@@ -1,7 +1,7 @@
-# aws-eks-accelerator-for-terraform
+# aws-eks-oam-example
 
 # Main Purpose
-This project provides a framework for deploying best-practice multi-tenant [EKS Clusters](https://aws.amazon.com/eks), provisioned via [Hashicorp Terraform](https://www.terraform.io/) and [Helm charts](https://helm.sh/) on [AWS](https://aws.amazon.com/).
+This project provides an example for installation of OAM on EKS. The project was made as a fork of "aws-eks-accellerator-terraform" project.
 
 # Overview
 The AWS EKS Accelerator for Terraform module helps you to provision [EKS Clusters](https://aws.amazon.com/eks), [managed node groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html) with [on-demand](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-on-demand-instances.html) and [spot instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html), [Fargate profiles](https://docs.aws.amazon.com/eks/latest/userguide/fargate-profile.html), and all the necessary plugins/add-ons for a production-ready EKS cluster. The [Terraform Helm provider](https://github.com/hashicorp/terraform-provider-helm) is used to deploy common Kubernetes add-ons with publicly available [Helm Charts](https://artifacthub.io/). This project leverages the official [terraform-aws-eks](https://github.com/terraform-aws-modules/terraform-aws-eks) module to create EKS Clusters
@@ -149,7 +149,7 @@ Ensure that you have installed the following tools in your Mac or Windows Laptop
 6. [eksctl](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html) - currently needed to enable Windows support
 
 ## Deployment Steps
-The following steps walks you through the deployment of example [DEV cluster](live/preprod/eu-west-1/application/dev/base.tfvars) configuration. This config deploys a private EKS cluster with public and private subnets.
+The following steps walks you through the deployment of example [DEV cluster](live/dev/eu-south-1/application/dev/base.tfvars) configuration. This config deploys a private EKS cluster with public and private subnets.
 
 Two managed worker nodes with On-demand and Spot instances along with one fargate profile for default namespace placed in private subnets. ALB placed in Public subnets created by LB Ingress controller.
 
@@ -160,21 +160,21 @@ It also deploys few kubernetes apps i.e., LB Ingress Controller, Metrics Server,
 #### Step1: Clone the repo using the command below
 
 ```shell script
-git clone https://github.com/aws-samples/aws-eks-accelerator-for-terraform.git
+git clone https://github.com/emanuelr93/aws-eks-oam-example.git
 ```
 
 #### Step2: Update base.tfvars file
 
-Update `~/aws-eks-accelerator-for-terraform/live/preprod/eu-west-1/application/dev/base.tfvars` file with the instructions specified in the file (OR use the default values). You can choose to use an existing VPC ID and Subnet IDs or create a new VPC and subnets by providing CIDR ranges in `base.tfvars` file
+Update `~/aws-eks-oam-example/live/dev/eu-west-1/application/dev/base.tfvars` file with the instructions specified in the file (OR use the default values). You can choose to use an existing VPC ID and Subnet IDs or create a new VPC and subnets by providing CIDR ranges in `base.tfvars` file
 
 ####  Step3: Update Terraform backend config file
 
-Update `~/aws-eks-accelerator-for-terraform/live/preprod/eu-west-1/application/dev/backend.conf` with your local directory path. [state.tf](source/state.tf) file contains backend config.
+Update `~/~/aws-eks-oam-example/live/dev/eu-west-1/application/dev/backend.conf` with your local directory path. [state.tf](source/state.tf) file contains backend config.
 
 Local terraform state backend config variables
 
 ```hcl-terraform
-    path = "local_tf_state/ekscluster/preprod/application/dev/terraform-main.tfstate"
+    path = "local_tf_state/ekscluster/dev/application/dev/terraform-main.tfstate"
 ```
 
 It's highly recommended to use remote state in S3 instead of using local backend. The following variables needs filling for S3 backend.
@@ -182,7 +182,7 @@ It's highly recommended to use remote state in S3 instead of using local backend
 ```hcl-terraform
     bucket = "<s3 bucket name>"
     region = "<aws region>"
-    key    = "ekscluster/preprod/application/dev/terraform-main.tfstate"
+    key    = "ekscluster/dev/application/dev/terraform-main.tfstate"
 ```
 
 #### Step4: Assume IAM role before creating a EKS cluster.
@@ -196,7 +196,7 @@ aws-mfa --assume-role  arn:aws:iam::<ACCOUNTID>:role/<IAMROLE>
 to initialize a working directory with configuration files
 
 ```shell script
-terraform -chdir=source init -backend-config ../live/preprod/eu-west-1/application/dev/backend.conf
+terraform -chdir=source init -backend-config ../live/dev/eu-west-1/application/dev/backend.conf
 ```
 
 
@@ -204,14 +204,14 @@ terraform -chdir=source init -backend-config ../live/preprod/eu-west-1/applicati
 to verify the resources created by this execution
 
 ```shell script
-terraform -chdir=source plan -var-file ../live/preprod/eu-west-1/application/dev/base.tfvars
+terraform -chdir=source plan -var-file ../live/dev/eu-west-1/application/dev/base.tfvars
 ```
 
 #### Step7: Finally, Terraform APPLY
 to create resources
 
 ```shell script
-terraform -chdir=source apply -var-file ../live/preprod/eu-west-1/application/dev/base.tfvars
+terraform -chdir=source apply -var-file ../live/dev/eu-west-1/application/dev/base.tfvars
 ```
 
 **Alternatively you can use Makefile to deploy by skipping Step5, Step6 and Step7**
@@ -221,17 +221,17 @@ terraform -chdir=source apply -var-file ../live/preprod/eu-west-1/application/de
 #### Executing Terraform PLAN
     $ make tf-plan-eks env=<env> region=<region> account=<account> subenv=<subenv>
     e.g.,
-    $ make tf-plan-eks env=preprod region=eu-west-1 account=application subenv=dev
+    $ make tf-plan-eks env=dev region=eu-west-1 account=application subenv=dev
 
 #### Executing Terraform APPLY
     $ make tf-apply-eks env=<env> region=<region> account=<account> subenv=<subenv>
     e.g.,
-    $ make tf-apply-eks env=preprod region=eu-west-1 account=application subenv=dev
+    $ make tf-apply-eks env=dev region=eu-west-1 account=application subenv=dev
 
 #### Executing Terraform DESTROY
     $ make tf-destroy-eks env=<env> region=<region> account=<account> subenv=<subenv>
     e.g.,
-    make tf-destroy-eks env=preprod region=eu-west-1 account=application subenv=dev
+    make tf-destroy-eks env=dev region=eu-west-1 account=application subenv=dev
 
 ### Configure kubectl and test cluster
 EKS Cluster details can be extracted from terraform output or from AWS Console to get the name of cluster. This following command used to update the `kubeconfig` in your local machine where you run kubectl commands to interact with your EKS Cluster.
@@ -311,11 +311,7 @@ For fully Private EKS clusters requires the following VPC endpoints to be create
 
 
 # Author
-Created by [Vara Bonthu](https://github.com/vara-bonthu). Maintained by [Ulaganathan N](https://github.com/UlaganathanNamachivayam), [Jomcy Pappachen](https://github.com/jomcy-amzn)
-
-## Security
-
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
+Created by [Emanuel Russo](https://github.com/emanuelr93).
 
 ## License
 

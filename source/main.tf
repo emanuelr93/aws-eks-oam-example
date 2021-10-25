@@ -309,34 +309,7 @@ module "eks" {
   // Managed node groups with on-demand and spot using launch templates
   #----------------------------------------------------------------------------------
   node_groups = {
-    #----------------------------------------------------------------------------------
-    // SPOT WORKERS WITH PRIVATE SUBNETS
-    #----------------------------------------------------------------------------------
-    mg-m5-spot = {
-      desired_capacity        = var.spot_desired_size
-      min_capacity            = var.spot_min_size
-      max_capacity            = var.spot_max_size
-      subnets                 = var.create_vpc == false ? var.private_subnet_ids : module.vpc.private_subnets
-      launch_template_id      = module.launch-templates-spot.launch_template_id
-      launch_template_version = module.launch-templates-spot.launch_template_latest_version
-      instance_types          = var.spot_instance_type
-      capacity_type           = "SPOT"
-      ami_type                = var.spot_ami_type
 
-      # Conditionally set iam_role_arn if Windows support is enabled
-      iam_role_arn = var.enable_windows_support ? module.windows_support_iam[0].linux_role.arn : module.eks.worker_iam_role_arn
-
-      # kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
-      k8s_labels = {
-        Environment = var.environment
-        Zone        = var.zone
-        WorkerType  = "SPOT"
-      }
-      additional_tags = {
-        ExtraTag = var.spot_node_group_name
-        Name     = "${module.eks-label.id}-${var.spot_node_group_name}"
-      }
-    },
     #----------------------------------------------------------------------------------
     // ON DEMAND WORKERS WITH PRIVATE SUBNETS
     #----------------------------------------------------------------------------------
@@ -373,63 +346,7 @@ module "eks" {
       //          effect = "NO_SCHEDULE"
       //        }
       //      ]
-    },
-
-    #----------------------------------------------------------------------------------
-    # ON DEMAND WORKERS WITH PUBLIC SUBNETS
-    #----------------------------------------------------------------------------------
-    mg-m5public = {
-      desired_capacity        = var.on_demand_desired_size
-      max_capacity            = var.on_demand_max_size
-      min_capacity            = var.on_demand_min_size
-      subnets                 = var.create_vpc == false ? var.public_subnet_ids : module.vpc.public_subnets
-      launch_template_id      = module.public-launch-templates-on-demand.launch_template_id
-      launch_template_version = module.public-launch-templates-on-demand.launch_template_latest_version
-      instance_types          = var.on_demand_instance_type
-      capacity_type           = "ON_DEMAND"
-      ami_type                = var.on_demand_ami_type
-
-      # Conditionally set iam_role_arn if Windows support is enabled
-      iam_role_arn = var.enable_windows_support ? module.windows_support_iam[0].linux_role.arn : module.eks.worker_iam_role_arn
-
-      k8s_labels = {
-        Environment = var.environment
-        Zone        = var.zone
-        WorkerType  = "ON_DEMAND"
-      }
-      additional_tags = {
-        ExtraTag = var.on_demand_node_group_name
-        Name     = "${module.eks-label.id}-${var.on_demand_node_group_name}"
-      }
-    },
-
-    #----------------------------------------------------------------------------------
-    # BOTTLEROCKET
-    #----------------------------------------------------------------------------------
-    brkt = {
-      desired_capacity        = var.bottlerocket_desired_size
-      max_capacity            = var.bottlerocket_max_size
-      min_capacity            = var.bottlerocket_min_size
-      subnets                 = var.create_vpc == false ? var.private_subnet_ids : module.vpc.private_subnets
-      launch_template_id      = module.launch-templates-bottlerocket.launch_template_id
-      launch_template_version = module.launch-templates-bottlerocket.launch_template_latest_version
-      instance_types          = var.bottlerocket_instance_type
-      capacity_type           = "ON_DEMAND"
-
-      # Conditionally set iam_role_arn if Windows support is enabled
-      iam_role_arn = var.enable_windows_support ? module.windows_support_iam[0].linux_role.arn : module.eks.worker_iam_role_arn
-
-      k8s_labels = {
-        Environment = var.environment
-        Zone        = var.zone
-        OS          = "bottlerocket"
-        WorkerType  = "ON_DEMAND_BOTTLEROCKET"
-      }
-      additional_tags = {
-        ExtraTag = var.bottlerocket_node_group_name
-        Name     = "${module.eks-label.id}-${var.bottlerocket_node_group_name}"
-      }
-    },
+    }
   }
 
   #-------------------------------------------------------------------------------------------
@@ -494,37 +411,6 @@ module "eks" {
       propagate_at_launch = true
     }] : []
   }] : []
-
-  #----------------------------------------------------------------------------------
-  # Fargate profile for default namespace
-  #----------------------------------------------------------------------------------
-  fargate_profiles = {
-    fg-ns-default = {
-      name = var.fargate_profile_namespace
-
-      subnets = var.create_vpc == false ? var.private_subnet_ids : module.vpc.private_subnets
-
-      selectors = [
-        {
-          namespace = "kube-system"
-          labels = {
-            k8s-app = "kube-dns"
-          }
-        },
-        {
-          namespace = var.fargate_profile_namespace
-          labels = {
-            WorkerType = "fargate"
-          }
-        }
-      ]
-      tags = {
-        Environment = var.environment
-        Zone        = var.zone
-        worker_type = "fargate"
-      }
-    }
-  }
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -733,5 +619,12 @@ module "helm" {
   opentelemetry_min_standalone_collectors               = var.opentelemetry_min_standalone_collectors
   opentelemetry_max_standalone_collectors               = var.opentelemetry_max_standalone_collectors
 
+   # ------- Kubevela Module ---------
+  kubevela_enable                                  = var.kubevela_enable
+  kubevela_helm_chart                              = var.kubevela_helm_chart
+  kubevela_image                                   = var.kubevela_image
+  kubevela_image_tag                               = var.kubevela_image_tag
+  kubevela_helm_chart_version                      = var.kubevela_helm_chart_version
+ 
   depends_on = [module.eks]
 }

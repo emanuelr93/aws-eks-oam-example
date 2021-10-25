@@ -132,3 +132,15 @@ module "opentelemetry_collector" {
   opentelemetry_min_standalone_collectors               = var.opentelemetry_min_standalone_collectors
   opentelemetry_max_standalone_collectors               = var.opentelemetry_max_standalone_collectors
 }
+
+module "kubevela" {
+  count                                            = var.kubevela_enable == true ? 1 : 0
+  source                                           = "./kubevela"
+  private_container_repo_url                       = var.private_container_repo_url
+  public_docker_repo                               = var.public_docker_repo
+  kubevela_helm_chart                              = var.kubevela_helm_chart
+  kubevela_image                                   = var.kubevela_image
+  kubevela_image_tag                               = var.kubevela_image_tag
+  kubevela_helm_chart_version                      = var.kubevela_helm_chart_version
+}
+

@@ -62,6 +62,12 @@ variable "opentelemetry_enable" {
   description = "Enabling opentelemetry on eks cluster"
 }
 
+variable "kubevela_enable" {
+  type        = bool
+  default     = false
+  description = "Enabling kubevela on eks cluster"
+}
+
 variable "fargate_iam_role" {}
 
 variable "s3_nlb_logs" {
@@ -166,3 +172,11 @@ variable "opentelemetry_enable_agent_collector" {}
 variable "opentelemetry_enable_autoscaling_standalone_collector" {}
 
 variable "opentelemetry_enable_container_logs" {}
+
+variable "kubevela_image_tag" {}
+
+variable "kubevela_image" {}
+
+variable "kubevela_helm_chart_version" {}
+
+variable "kubevela_helm_chart" {}

@@ -16,11 +16,26 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#  Terraform state for S3 backend config variables
+locals {
+  image_url = var.public_docker_repo ? var.kubevela_image : "${var.private_container_repo_url}${var.kubevela_image}"
+}
 
-#bucket = "<bucket>"
-#region = "<region>"
-#key    = "ekscluster/preprod/gaming/test/terraform-main.tfstate"
+resource "kubernetes_namespace" "kubevela_system" {
+  metadata {
+    name = "vela-system"
+  }
+}
+#Workaround for issue https://github.com/hashicorp/terraform-provider-helm/issues/707
+resource "helm_release" "kubevela" {
+  name       = "vela-core"
+  #repository = "https://charts.kubevela.net/core"
+  chart      = "https://kubevelacharts.oss-cn-hangzhou.aliyuncs.com/core/vela-core-${var.kubevela_helm_chart_version}.tgz"
+  #version    = var.kubevela_helm_chart_version
+  namespace  = kubernetes_namespace.kubevela_system.id
+  timeout    = "1200"
+  values = [templatefile("${path.module}/templates/kubevela-values.yaml", {
+    image = local.image_url
+    tag                                     = var.kubevela_image_tag
+  })]
+}
 
-# Terraform state for local backend
-path = "local_tf_state/ekscluster/preprod/gaming/test/terraform-main.tfstate"
