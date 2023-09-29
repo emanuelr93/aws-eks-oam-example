@@ -49,7 +49,7 @@ create_vpc_endpoints = false
 #   Endpoint public access: true    - Your cluster API server is accessible from the internet. You can, optionally, limit the CIDR blocks that can access the public endpoint.
 #   Endpoint private access: true   - Kubernetes API requests within your cluster's VPC (such as node to control plane communication) use the private VPC endpoint.
 #---------------------------------------------------------#
-kubernetes_version      = "1.20"
+kubernetes_version      = "1.27"
 endpoint_private_access = true
 endpoint_public_access  = true
 
@@ -60,13 +60,13 @@ enabled_cluster_log_types    = ["api", "audit", "authenticator", "controllerMana
 cluster_log_retention_period = 1
 
 enable_vpc_cni_addon  = true
-vpc_cni_addon_version = "v1.8.0-eksbuild.1"
+vpc_cni_addon_version = "v1.15.0-eksbuild.2"
 
 enable_coredns_addon  = true
-coredns_addon_version = "v1.8.3-eksbuild.1"
+coredns_addon_version = "v1.10.1-eksbuild.4"
 
 enable_kube_proxy_addon  = true
-kube_proxy_addon_version = "v1.20.4-eksbuild.2"
+kube_proxy_addon_version = "v1.27.4-minimal-eksbuild.2"
 
 
 #---------------------------------------------------------#
@@ -108,15 +108,15 @@ metric_server_helm_chart_version = "2.12.1"
 # ENABLE CLUSTER AUTOSCALER
 #---------------------------------------------------------#
 cluster_autoscaler_enable       = true
-cluster_autoscaler_image_tag    = "v1.20.0"
-cluster_autoscaler_helm_version = "9.9.2"
+cluster_autoscaler_image_tag    = "v1.28.0"
+cluster_autoscaler_helm_version = "9.29.3"
 
 #---------------------------------------------------------#
 # ENABLE KUBEVELA
 #---------------------------------------------------------#
 kubevela_enable       = true
-kubevela_image_tag    = "v1.1.6"
-kubevela_helm_chart_version = "1.1.6"
+kubevela_image_tag    = "v1.9.6"
+kubevela_helm_chart_version = "1.9.6"
 
 //---------------------------------------------------------//
 // DISABLE ALB INGRESS CONTROLLER
